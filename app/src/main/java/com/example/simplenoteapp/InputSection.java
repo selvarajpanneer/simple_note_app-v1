@@ -1,6 +1,7 @@
 package com.example.simplenoteapp;
 
 import android.app.Activity;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,11 +9,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Calendar;
+
 
 public class InputSection extends AppCompatActivity {
 
@@ -20,6 +23,7 @@ public class InputSection extends AppCompatActivity {
     EditText mtitle;
     EditText mcontent;
     String title, content;
+    String Alarmtime = null;
     int slno;
     //sql instantiation to handle db
     SqlHelper inputdbHelper = new SqlHelper(InputSection.this);
@@ -53,7 +57,7 @@ public class InputSection extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.item1:
-                //  reminder();
+                reminderTimePicker();
                 return true;
             case R.id.item2:
                 backToMainPage();
@@ -63,6 +67,21 @@ public class InputSection extends AppCompatActivity {
         }
     }
 
+    public void reminderTimePicker() {
+        Calendar mcurrentTime = Calendar.getInstance();
+        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+        int minute = mcurrentTime.get(Calendar.MINUTE);
+        TimePickerDialog mTimePicker;
+        mTimePicker = new TimePickerDialog(InputSection.this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                //Take the alarm time
+                Alarmtime = selectedHour + ":" + selectedMinute;
+            }
+        }, hour, minute, false);
+        mTimePicker.show();
+    }
+
     public void backToMainPage() {
         //get the input from views
         title = mtitle.getText().toString().trim();
@@ -70,22 +89,21 @@ public class InputSection extends AppCompatActivity {
         if (!title.isEmpty()) {
             if (!content.isEmpty()) {
                 String creation_time = java.text.DateFormat.getDateTimeInstance().format(Calendar.getInstance().getTime());
-                if (slno != 0) {//update existing row notes
-                    inputdbHelper.updateNotes(slno, title, content);
-                } else {//create new row in notes
-                    inputdbHelper.addNotes(title, content, creation_time);
+                if (slno != 0) {//update alarmtime in existing rows of notes
+                    inputdbHelper.updateNotes(slno, title, content, Alarmtime);
+                } else {//create new row in notes with alarmtime
+                    inputdbHelper.addNotes(title, content, creation_time, Alarmtime);
                 }
             } else {
-                Log.d(TAG, "onClick: content is empty");
+                Log.d(TAG, "INPUTSECTION notes: content is empty");
             }
         } else {
-            Log.d(TAG, "onClick: title is empty");
+            Log.d(TAG, "INPUTSECTICON notes: title is empty");
         }
         Intent return_intent = new Intent();
         setResult(Activity.RESULT_OK, return_intent);
         finish();
     }
 }
-
 
 

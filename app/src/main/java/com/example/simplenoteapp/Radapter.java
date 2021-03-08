@@ -7,8 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 
 
@@ -20,7 +22,7 @@ public class Radapter extends RecyclerView.Adapter<Radapter.ViewHolder> {
     private Context rContext;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView1, textView2, textView3,textView4;
+        private final TextView textView1, textView2, textView3, textView4;
         private View itemLayout;
 
 
@@ -50,7 +52,7 @@ public class Radapter extends RecyclerView.Adapter<Radapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull Radapter.ViewHolder holder, int position) {
         Notes nl = mNoteList.get(position);
-        int slno= nl.getSlno();
+        int slno = nl.getSlno();
         String title = nl.getTitle();
         String content = nl.getContent();
         String c_time = nl.getCreation_time();
@@ -61,20 +63,17 @@ public class Radapter extends RecyclerView.Adapter<Radapter.ViewHolder> {
         holder.textView3.setText(t);
         holder.textView4.setText(c_time);
 
-
         holder.itemLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent edit_intent = new Intent(rContext, InputSection.class);
-                edit_intent.putExtra("edit_slno",slno);
+                edit_intent.putExtra("edit_slno", slno);
                 edit_intent.putExtra("edit_title", title);
                 edit_intent.putExtra("edit_content", content);
                 rContext.startActivity(edit_intent);
 
             }
         });
-
-
     }
 
     public String checkTimePeriod(Long time) {

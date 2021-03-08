@@ -4,7 +4,7 @@ public class Notes {
     int slno;
     String title;
     String content;
-    String creation_time;
+    String creation_time,alarmtime;
     Long last_modified_time;
 
     public Notes() {
@@ -15,6 +15,14 @@ public class Notes {
         this.title = title;
         this.content = content;
         this.creation_time = creation_time;
+        this.last_modified_time=last_modified_time;
+    }
+    public Notes(int slno,String title, String content, String creation_time,String alarmtime,Long last_modified_time) {
+        this.slno=slno;
+        this.title = title;
+        this.content = content;
+        this.creation_time = creation_time;
+        this.alarmtime=alarmtime;
         this.last_modified_time=last_modified_time;
     }
     public int getSlno(){return  slno;}
@@ -30,6 +38,8 @@ public class Notes {
     public String getCreation_time() {
         return creation_time;
     }
+
+    public String getAlarmtime(){ return alarmtime; }
 
     public Long getLast_modified_time(){return last_modified_time;}
 }

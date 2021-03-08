@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.simplenoteapp">
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -61,7 +62,7 @@
         </receiver>
 
         <service
-            android:name=".MyService"
+            android:name=".NotificationService"
             android:enabled="true"
             android:exported="false"
             android:process=":remote" />

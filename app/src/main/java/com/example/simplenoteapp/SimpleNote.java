@@ -1,14 +1,19 @@
 package com.example.simplenoteapp;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +21,7 @@ import android.view.View;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 
 public class SimpleNote extends AppCompatActivity {
@@ -29,16 +35,21 @@ public class SimpleNote extends AppCompatActivity {
     RecyclerView.Adapter recyclerView_Adapter;
     RecyclerView.LayoutManager recyclerView_LayoutManager;
     ArrayList<Notes> loadNotesList;
-
+    ArrayList<Notes> alarmList;
+    //for alarm
+    int alarm_result;
     //sql instantiation to handle db
     SqlHelper dbHelper = new SqlHelper(this);
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //set recyclerview
+        //set recyclerview  and alarms
         setRecyclerView_View();
+        setAlarm();
+
         //swipe delete
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback =
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -55,10 +66,10 @@ public class SimpleNote extends AppCompatActivity {
                         int position = viewHolder.getAdapterPosition();
                         Notes delete_file = loadNotesList.get(position);
                         int delete = delete_file.getSlno();
-//                        dbHelper.deleteNotes(delete);
-//                        recyclerView_View.removeViewAt(position);
-//                        recyclerView_Adapter.notifyItemRemoved(position);
-//                        recyclerView_Adapter.notifyItemRangeChanged(position,loadNotesList.size());
+                        dbHelper.deleteNotes(delete);
+                        recyclerView_View.removeViewAt(position);
+                        recyclerView_Adapter.notifyItemRemoved(position);
+                        recyclerView_Adapter.notifyItemRangeChanged(position, loadNotesList.size());
                     }
 
                     Paint paint;
@@ -91,6 +102,7 @@ public class SimpleNote extends AppCompatActivity {
                         }
                     }
                 };
+        //using  fab to add new notes to list
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView_View);
 
@@ -102,7 +114,39 @@ public class SimpleNote extends AppCompatActivity {
             }
         });
     }
-    public  void setRecyclerView_View(){
+//set alarm based on alarmtime stored in db
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void setAlarm() {//start series of alarms one by one
+        alarmList = dbHelper.AlarmlistNotes();
+
+        for (int i = 0; i < alarmList.size(); i++) {
+            AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(this, MyBroadCastReceiver.class);
+            Notes notes = alarmList.get(i);
+            String alarm_time = notes.getAlarmtime();
+            if (alarm_time != null) {
+                int slno = notes.getSlno();
+                String notification_Title = notes.getTitle();
+                String notification_Content = notes.getContent();
+                Log.d(TAG, "setAlarm: "+slno+" "+notification_Title+" "+notification_Content);
+                String[] s = alarm_time.split(":");
+                int hour = Integer.parseInt(s[0].trim());
+                int minute = Integer.parseInt(s[1].trim());
+                Calendar c = Calendar.getInstance();
+                c.set(Calendar.HOUR_OF_DAY, hour);
+                c.set(Calendar.MINUTE, minute);
+                c.set(Calendar.SECOND, 0);
+                intent.putExtra("notification_slno", slno);
+                intent.putExtra("notification_title", notification_Title);
+                intent.putExtra("notification_content", notification_Content);
+                int id = (int)System.currentTimeMillis();
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_ONE_SHOT);
+                alarmMgr.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pendingIntent);
+            }
+        }
+    }
+//set recyclerview with noteslist
+    public void setRecyclerView_View() {
         //list loading
         if (dbHelper.listNotes() != null) {
             loadNotesList = dbHelper.listNotes();
@@ -116,17 +160,20 @@ public class SimpleNote extends AppCompatActivity {
         recyclerView_View.setLayoutManager(recyclerView_LayoutManager);
         recyclerView_View.setAdapter(recyclerView_Adapter);
     }
+//guided to notes input page
     public void addItem() {
         Intent create_intent = new Intent(SimpleNote.this, InputSection.class);
         startActivityForResult(create_intent, LAUNCH_SECOND_ACTIVITY);
     }
-
+//refresh the updated noteslist
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onResume() {
         super.onResume();
         setRecyclerView_View();
+        setAlarm();
     }
-
+//guided back from inputsection to main page
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
