@@ -63,13 +63,13 @@ public class SimpleNote extends AppCompatActivity {
                     @Override
                     public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                         //Remove swiped item from list and notify the RecyclerView
-                        int position = viewHolder.getAdapterPosition();
-                        Notes delete_file = loadNotesList.get(position);
-                        int delete = delete_file.getSlno();
-                        dbHelper.deleteNotes(delete);
-                        recyclerView_View.removeViewAt(position);
-                        recyclerView_Adapter.notifyItemRemoved(position);
-                        recyclerView_Adapter.notifyItemRangeChanged(position, loadNotesList.size());
+//                        int position = viewHolder.getAdapterPosition();
+//                        Notes delete_file = loadNotesList.get(position);
+//                        int delete = delete_file.getSlno();
+//                        dbHelper.deleteNotes(delete);
+//                        recyclerView_View.removeViewAt(position);
+//                        recyclerView_Adapter.notifyItemRemoved(position);
+//                        recyclerView_Adapter.notifyItemRangeChanged(position, loadNotesList.size());
                     }
 
                     Paint paint;

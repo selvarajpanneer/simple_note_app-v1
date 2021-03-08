@@ -36,7 +36,6 @@ public class NotificationService extends ContextWrapper {
     }
 
     public NotificationCompat.Builder getChannelNotification(String title, String content) {
-        // Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         return new NotificationCompat.Builder(getApplicationContext(), channelID)
                 .setContentTitle(title)
                 .setContentText(content)
